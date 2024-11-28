@@ -24,24 +24,28 @@ cursor.execute("""
 conn.commit()
 
 
-def get_current_weather(city):
-    """Fetch current weather from the API."""
-    url = f"http://api.openweathermap.org/data/2.5/weather?q={
-        city}&appid={API_KEY}&units=metric"
+def fetch_weather_data(url):
+    """Fetch weather data from the API."""
     response = requests.get(url, timeout=10)
     if response.status_code == 200:
         return response.json()
     return None
 
 
+@st.cache_data(ttl=600)
+def get_current_weather(city):
+    """Fetch current weather from the API."""
+    url = f"http://api.openweathermap.org/data/2.5/weather?q={
+        city}&appid={API_KEY}&units=metric"
+    return fetch_weather_data(url)
+
+
+@st.cache_data(ttl=600)
 def get_weather_forecast(city):
     """Fetch weather forecast from the API."""
     url = f"http://api.openweathermap.org/data/2.5/forecast?q={
         city}&appid={API_KEY}&units=metric"
-    response = requests.get(url)
-    if response.status_code == 200:
-        return response.json()
-    return None
+    return fetch_weather_data(url)
 
 
 def log_weather_data(city, temperature, humidity, wind_speed):
